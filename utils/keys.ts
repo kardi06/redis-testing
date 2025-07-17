@@ -4,3 +4,5 @@
 export function getKeysName(...args: string[]){
     return `bitees:${args.join(":")}`;
 }
+
+export const restaurantKeyById = (id:string) => getKeysName("restaurants",id);
