@@ -12,16 +12,15 @@ const router = express.Router();
 router.get(
   "/:restaurantId",
   checkRestaurantExists,
-  async (
-    req: Request<{ restaurantId: string }>,
-    res,
-    next
-  ) => {
+  async (req: Request<{ restaurantId: string }>, res, next) => {
     const { restaurantId } = req.params;
     try {
       const client = await initializeRedisClient();
       const restaurantKey = restaurantKeyById(restaurantId);
-      const restaurant = await client.hGetAll(restaurantKey);
+      const [viewCount, restaurant] = await Promise.all([
+        client.hIncrBy(restaurantKey, "viewCount", 1),
+        client.hGetAll(restaurantKey),
+      ]);
       return successResponse(
         res,
         restaurant,
