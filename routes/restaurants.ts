@@ -9,7 +9,7 @@ import { successResponse } from "../utils/responses.js";
 
 const router = express.Router();
 
-router.get("/",validate(RestaurantSchema), async (req, res, next) => {
+router.post("/",validate(RestaurantSchema), async (req, res, next) => {
   const data = req.body as Restaurant;
   try{
     const client = await initializeRedisClient();
