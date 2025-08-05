@@ -5,7 +5,7 @@ import { ReviewSchema, type Review } from "../schemas/review.js";
 import { initializeRedisClient } from "../utils/client.js";
 import { nanoid } from "nanoid";
 import { restaurantKeyById, reviewKeyById, reviewDetailsKeyById } from "../utils/keys.js";
-import { successResponse } from "../utils/responses.js";
+import { successResponse, errorResponse } from "../utils/responses.js";
 import { checkRestaurantExists } from "../middlewares/checkRestaurantId.js";
 
 const router = express.Router();
@@ -60,6 +60,34 @@ router.get("/:restaurantId/reviews", checkRestaurantExists, async (req: Request<
     next(error);
   }
 });
+
+router.delete(
+  "/:restaurantId/reviews/:reviewId",
+  checkRestaurantExists,
+  async (
+    req: Request<{ restaurantId: string; reviewId: string }>,
+    res,
+    next
+  ) => {
+    const { restaurantId, reviewId } = req.params;
+
+    try {
+      const client = await initializeRedisClient();
+      const reviewKey = reviewKeyById(restaurantId);
+      const reviewDetailsKey = reviewDetailsKeyById(reviewId);
+      const [removeResult, deleteResult] = await Promise.all([
+        client.lRem(reviewKey, 0, reviewId),
+        client.del(reviewDetailsKey),
+      ]);
+      if (removeResult === 0 && deleteResult === 0) {
+        return errorResponse(res, 404, "Review not found");
+      }
+      return successResponse(res, reviewId, "Review deleted");
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
 router.get(
   "/:restaurantId",
