@@ -9,3 +9,6 @@ export const restaurantKeyById = (id:string) => getKeysName("restaurants",id);
 
 export const reviewKeyById = (id:string) => getKeysName("reviews",id);
 export const reviewDetailsKeyById = (id:string) => getKeysName("review_details",id);
+
+export const cuisinesKey = getKeyName("cuisines");
+export const cuisineKey = (name: string) => getKeyName("cuisine", name);
